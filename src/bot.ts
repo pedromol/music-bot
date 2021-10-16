@@ -194,4 +194,11 @@ client.on('interactionCreate', async (interaction: Interaction) => {
 
 client.on('error', console.warn);
 
-void client.login(discordToken);
+const keepAlive = (): Promise<string> => {
+	return client.login(discordToken).catch((e): Promise<string> => {
+		console.error(e);
+		return keepAlive();
+	});
+}
+
+keepAlive();
