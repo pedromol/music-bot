@@ -111,7 +111,7 @@ client.on('interactionCreate', async (interaction: Interaction) => {
 		// Extract the video URL from the command
 		const url = interaction.options.get('song')!.value! as string;
 		const normalizedUrl = await argNormalizer.getUrl(url);
-console.log(normalizedUrl);
+
 		if (!normalizedUrl) {
 			await interaction.followUp('Failed to find the track!');
 			return;
