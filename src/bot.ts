@@ -8,12 +8,13 @@ import {
 } from '@discordjs/voice';
 import { Track } from './music/track';
 import { MusicSubscription } from './music/subscription';
+import { argumentNormalizer } from './normalizer/argumentNormalizer';
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports
-// const { token } = require('../auth.json');
-const token = process.env['DISCORD_TOKEN'];
+const discordToken = process.env['DISCORD_TOKEN'];
+const ytApiKey = process.env['YT_API_KEY'];
 
 const client = new Discord.Client({ intents: ['GUILD_VOICE_STATES', 'GUILD_MESSAGES', 'GUILDS'] });
+const argNormalizer = new argumentNormalizer(ytApiKey);
 
 client.on('ready', () => console.log('Ready!'));
 
@@ -74,8 +75,6 @@ client.on('interactionCreate', async (interaction: Interaction) => {
 
 	if (interaction.commandName === 'play') {
 		await interaction.deferReply();
-		// Extract the video URL from the command
-		const url = interaction.options.get('song')!.value! as string;
 
 		// If a connection to the guild doesn't already exist and the user is in a voice channel, join that channel
 		// and create a subscription.
@@ -109,9 +108,18 @@ client.on('interactionCreate', async (interaction: Interaction) => {
 			return;
 		}
 
+		// Extract the video URL from the command
+		const url = interaction.options.get('song')!.value! as string;
+		const normalizedUrl = await argNormalizer.getUrl(url);
+console.log(normalizedUrl);
+		if (!normalizedUrl) {
+			await interaction.followUp('Failed to find the track!');
+			return;
+		}
+
 		try {
 			// Attempt to create a Track from the user's video URL
-			const track = await Track.from(url, {
+			const track = await Track.from(normalizedUrl, {
 				onStart() {
 					interaction.followUp({ content: 'Now playing!', ephemeral: true }).catch(console.warn);
 				},
@@ -186,4 +194,4 @@ client.on('interactionCreate', async (interaction: Interaction) => {
 
 client.on('error', console.warn);
 
-void client.login(token);
+void client.login(discordToken);
