@@ -1,4 +1,4 @@
-import youtubeSearch from "youtube-search";
+import youtubeSearch from 'youtube-search';
 
 export class argumentNormalizer {
   constructor(private ytApiKey = process.env['YT_API_KEY']) {}
@@ -37,10 +37,10 @@ export class argumentNormalizer {
 
   private async ytSearch(query: string): Promise<string | undefined> {
     return youtubeSearch(query, { maxResults: 1, key: this.ytApiKey }).then((result) => {
-        if (result?.results && result?.results?.length > 0) {
-            return `https://www.youtube.com/watch?v=${result.results[0].id}`;
-        }
-        return undefined;
+      if (result?.results && result?.results?.length > 0) {
+        return `https://www.youtube.com/watch?v=${result.results[0].id}`;
+      }
+      return undefined;
     });
   }
 }
