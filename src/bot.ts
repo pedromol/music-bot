@@ -11,10 +11,9 @@ import { MusicSubscription } from './music/subscription';
 import { argumentNormalizer } from './normalizer/argumentNormalizer';
 
 const discordToken = process.env['DISCORD_TOKEN'];
-const ytApiKey = process.env['YT_API_KEY'];
 
 const client = new Discord.Client({ intents: ['GUILD_VOICE_STATES', 'GUILD_MESSAGES', 'GUILDS'] });
-const argNormalizer = new argumentNormalizer(ytApiKey);
+const argNormalizer = new argumentNormalizer(client);
 
 client.on('ready', () => console.log('Ready!'));
 
@@ -110,7 +109,9 @@ client.on('interactionCreate', async (interaction: Interaction) => {
 
     // Extract the video URL from the command
     const url = interaction.options.get('song')!.value! as string;
-    const normalizedUrl = await argNormalizer.getUrl(url);
+    console.log(`${interaction.user.username} requested ${url}`);
+    const normalizedUrl = await argNormalizer.getUrl(url, interaction.user);
+    console.log(`${interaction.user.username} got ${normalizedUrl}`);
 
     if (!normalizedUrl) {
       await interaction.followUp('Failed to find the track!');
@@ -194,6 +195,8 @@ client.on('interactionCreate', async (interaction: Interaction) => {
 });
 
 client.on('error', console.warn);
+
+process.on('uncaughtException', console.warn);
 
 const keepAlive = (): Promise<string> => {
   return client.login(discordToken).catch((e): Promise<string> => {
