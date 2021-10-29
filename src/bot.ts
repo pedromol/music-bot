@@ -8,12 +8,12 @@ import {
 } from '@discordjs/voice';
 import { Track } from './music/track';
 import { MusicSubscription } from './music/subscription';
-import { argumentNormalizer } from './normalizer/argumentNormalizer';
+import { Search } from './music/search';
 
 const discordToken = process.env['DISCORD_TOKEN'];
 
 const client = new Discord.Client({ intents: ['GUILD_VOICE_STATES', 'GUILD_MESSAGES', 'GUILDS'] });
-const argNormalizer = new argumentNormalizer(client);
+const musicSearch = new Search(client);
 
 client.on('ready', () => console.log('Ready!'));
 
@@ -108,9 +108,9 @@ client.on('interactionCreate', async (interaction: Interaction) => {
     }
 
     // Extract the video URL from the command
-    const url = interaction.options.get('song')!.value! as string;
-    console.log(`${interaction.user.username} requested ${url}`);
-    const normalizedUrl = await argNormalizer.getUrl(url, interaction.user);
+    const argument = interaction.options.get('song')!.value! as string;
+    console.log(`${interaction.user.username} requested ${argument}`);
+    const normalizedUrl = await musicSearch.getUrl(argument, interaction.user);
     console.log(`${interaction.user.username} got ${normalizedUrl}`);
 
     if (!normalizedUrl) {

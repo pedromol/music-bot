@@ -1,12 +1,13 @@
+import Discord from 'discord.js';
 import { Player } from 'discord-player';
 import * as ytdl from 'ytdl-core';
-export class argumentNormalizer {
+export class Search {
   private player;
-  constructor(client: any) {
+  constructor(client: Discord.Client) {
     this.player = new Player(client);
   }
 
-  public async getUrl(argument: string, user: any): Promise<string | undefined> {
+  public async getUrl(argument: string, user: Discord.User): Promise<string | undefined> {
     if (ytdl.validateURL(argument)) {
       return argument;
     }
