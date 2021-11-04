@@ -1,13 +1,13 @@
-import Discord from 'discord.js';
+import { User, Client } from 'discord.js';
 import { Player } from 'discord-player';
 import * as ytdl from 'ytdl-core';
 export class Search {
   private player;
-  constructor(client: Discord.Client) {
+  constructor(client: Client) {
     this.player = new Player(client);
   }
 
-  public async getUrl(argument: string, user: Discord.User): Promise<string | undefined> {
+  public async getUrl(argument: string, user: User): Promise<string | undefined> {
     if (ytdl.validateURL(argument)) {
       return argument;
     }
