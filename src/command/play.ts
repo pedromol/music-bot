@@ -28,7 +28,7 @@ export class Play extends Command {
 
   public async execute(route: Route): Promise<void> {
     if (route.interaction) await route.interaction.deferReply();
-    let subscription = await this.getSubscription(route);
+    let subscription = await this.getSubscription(route, false);
 
     // If a connection to the guild doesn't already exist and the user is in a voice channel, join that channel
     // and create a subscription.

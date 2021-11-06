@@ -3,12 +3,15 @@ import { Commands } from './command/commands';
 import { MusicSubscription } from './music/subscription';
 
 const discordToken = process.env['DISCORD_TOKEN'];
+const commandPrefix = process.env['DISCORD_COMMAND_PREFIX'] ?? '!';
 
 const client = new Discord.Client({ intents: ['GUILD_VOICE_STATES', 'GUILD_MESSAGES', 'GUILDS'] });
 const commands = new Commands(client, new Map<string, MusicSubscription>());
 
 client.on('messageCreate', async (message: Message): Promise<void> => {
-  return commands.execute({ message: message });
+  if (message.content[0] === commandPrefix) {
+    return commands.execute({ message: message });
+  }
 });
 
 // Handles slash command interactions

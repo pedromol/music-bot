@@ -10,7 +10,6 @@ import { Skip } from './skip';
 import { Queue } from './queue';
 
 export class Commands extends Command {
-  commandPrefix = process.env['DISCORD_COMMAND_PREFIX'] ?? '!';
   commands: Command[];
 
   constructor(client: Client, subscriptions: Map<Snowflake, MusicSubscription>) {
@@ -21,8 +20,8 @@ export class Commands extends Command {
 
   async execute(route: Route): Promise<void> {
     let command;
-    if (route.message && route.message.content[0] === this.commandPrefix) {
-      command = this.commands.find((cmd) => cmd.metadata?.name === route.message?.content.split(' ')[0]);
+    if (route.message) {
+      command = this.commands.find((cmd) => cmd.metadata?.name === route.message?.content.substr(1).split(' ')[0]);
     }
 
     if ((route.interaction && route.interaction.isCommand()) || route.interaction?.guildId) {
@@ -30,7 +29,7 @@ export class Commands extends Command {
     }
 
     if (command) {
-      command.execute(route);
+      return command.execute(route);
     }
 
     return this.reply({ content: 'Unknown command' }, route);
