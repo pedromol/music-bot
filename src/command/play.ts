@@ -67,36 +67,46 @@ export class Play extends Command {
     const argument = this.getArgument(route);
 
     const user = this.getUser(route) as User;
-    console.log(`${user?.username} requested ${argument}`);
-    const normalizedUrl = await this.musicSearch.getUrl(argument, user);
-    console.log(`${user?.username} got ${normalizedUrl}`);
+    const trackData = await this.musicSearch.getTrackData(argument, user);
 
-    if (!normalizedUrl) {
+    if (!trackData || !trackData.tracks.length) {
       return this.reply({ content: 'Failed to find the track!', followUp: true }, route);
     }
 
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const self = this;
     try {
-      // Attempt to create a Track from the user's video URL
-      const track = await Track.from(normalizedUrl, {
-        onStart() {
-          self.reply({ content: 'Now playing!', ephemeral: true, followUp: true }, route).catch(console.warn);
-        },
-        onFinish() {
-          self.reply({ content: 'Now finished!', ephemeral: true, followUp: true }, route).catch(console.warn);
-        },
-        onError(error: Error) {
-          console.warn(error);
-          self
-            .reply({ content: `Error: ${error.message}`, ephemeral: true, followUp: true }, route)
-            .catch(console.warn);
-        },
+      trackData.tracks.forEach((trackData) => {
+        // Attempt to create a Track from the user's video URL
+        const track = Track.from(
+          trackData,
+          {
+            onStart() {
+              self.reply({ content: 'Now playing!', ephemeral: true, followUp: true }, route).catch(console.warn);
+            },
+            onFinish() {
+              self.reply({ content: 'Now finished!', ephemeral: true, followUp: true }, route).catch(console.warn);
+            },
+            onError(error: Error) {
+              console.warn(error);
+              self
+                .reply({ content: `Error: ${error.message}`, ephemeral: true, followUp: true }, route)
+                .catch(console.warn);
+            },
+          },
+          this.musicSearch,
+        );
+        // Enqueue the track and reply a success message to the user
+        if (subscription) subscription.enqueue(track);
       });
-      // Enqueue the track and reply a success message to the user
-      subscription.enqueue(track);
-      console.log(`Enqueued **${track.title}**`);
-      await this.reply({ content: `Enqueued **${track.title}**`, followUp: true }, route);
+
+      await this.reply(
+        {
+          content: `Enqueued **${trackData.playlist ? trackData.playlist.title : trackData.tracks[0].title}**`,
+          followUp: true,
+        },
+        route,
+      );
     } catch (error) {
       console.warn(error);
       await this.reply({ content: 'Failed to play track, please try again later!' }, route);

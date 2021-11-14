@@ -1,13 +1,22 @@
-import { getInfo } from 'ytdl-core';
 import { AudioResource, createAudioResource, demuxProbe } from '@discordjs/voice';
+import { User } from 'discord.js';
 import { raw as ytdl } from 'youtube-dl-exec';
+import { Search } from './search';
 
 /**
  * This is the data required to create a Track object
  */
 export interface TrackData {
-  url: string;
   title: string;
+  author: string;
+  url: string;
+  thumbnail: string;
+  duration: string;
+  requestedBy: User;
+}
+
+export interface TrackAction extends TrackData {
+  search: Search;
   onStart: () => void;
   onFinish: () => void;
   onError: (error: Error) => void;
@@ -25,19 +34,29 @@ const noop = (): void => {};
  * we use tracks as they don't pre-emptively load the videos. Instead, once a Track is taken from the
  * queue, it is converted into an AudioResource just in time for playback.
  */
-export class Track implements TrackData {
-  public readonly url: string;
+export class Track implements TrackAction {
   public readonly title: string;
+  public readonly author: string;
+  public readonly url: string;
+  public readonly thumbnail: string;
+  public readonly duration: string;
+  public readonly requestedBy: User;
   public readonly onStart: () => void;
   public readonly onFinish: () => void;
+  public readonly search: Search;
   public readonly onError: (error: Error) => void;
 
-  private constructor({ url, title, onStart, onFinish, onError }: TrackData) {
-    this.url = url;
-    this.title = title;
-    this.onStart = onStart;
-    this.onFinish = onFinish;
-    this.onError = onError;
+  private constructor(trackAction: TrackAction) {
+    this.title = trackAction.title;
+    this.author = trackAction.author;
+    this.url = trackAction.url;
+    this.thumbnail = trackAction.thumbnail;
+    this.duration = trackAction.duration;
+    this.requestedBy = trackAction.requestedBy;
+    this.search = trackAction.search;
+    this.onStart = trackAction.onStart;
+    this.onFinish = trackAction.onFinish;
+    this.onError = trackAction.onError;
   }
 
   /**
@@ -45,6 +64,7 @@ export class Track implements TrackData {
    */
   public createAudioResource(): Promise<AudioResource<Track>> {
     return new Promise((resolve, reject) => {
+      console.log(this.url);
       const process = ytdl(
         this.url,
         {
@@ -82,9 +102,11 @@ export class Track implements TrackData {
    * @param methods Lifecycle callbacks
    * @returns The created Track
    */
-  public static async from(url: string, methods: Pick<Track, 'onStart' | 'onFinish' | 'onError'>): Promise<Track> {
-    const info = await getInfo(url);
-
+  public static from(
+    trackData: TrackData,
+    methods: Pick<Track, 'onStart' | 'onFinish' | 'onError'>,
+    search: Search,
+  ): Track {
     // The methods are wrapped so that we can ensure that they are only called once.
     const wrappedMethods = {
       onStart(): void {
@@ -102,9 +124,9 @@ export class Track implements TrackData {
     };
 
     return new Track({
-      title: info.videoDetails.title,
-      url,
+      ...trackData,
       ...wrappedMethods,
+      search,
     });
   }
 }
