@@ -67,6 +67,7 @@ export class Play extends Command {
     const argument = this.getArgument(route);
 
     const user = this.getUser(route) as User;
+    console.log(`${user.username} requested ${argument}`);
     const trackData = await this.musicSearch.getTrackData(argument, user);
 
     if (!trackData || !trackData.tracks.length) {
@@ -94,7 +95,7 @@ export class Play extends Command {
                 .catch(console.warn);
             },
           },
-          this.musicSearch,
+          self.musicSearch,
         );
         // Enqueue the track and reply a success message to the user
         if (subscription) subscription.enqueue(track);
