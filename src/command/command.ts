@@ -87,7 +87,7 @@ export abstract class Command {
     }
 
     if (route.message && route.message.content) {
-      return route.message.content.split(' ').splice(0, 1).join(' ');
+      return route.message.content.split(' ').slice(1).join(' ');
     }
 
     return '';

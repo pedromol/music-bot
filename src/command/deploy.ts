@@ -19,11 +19,7 @@ export class Deploy extends Command {
     if (route.message) {
       if (!this.client.application?.owner) await this.client.application?.fetch();
 
-      if (
-        route.message?.content?.toLowerCase() === '!deploy' &&
-        route.message?.author?.id === this.client?.application?.owner?.id &&
-        route.message.guild
-      ) {
+      if (route.message?.author?.id === this.client?.application?.owner?.id && route.message.guild) {
         await route.message.guild.commands.set(
           this.commands.filter((cmd) => cmd.metadata).map((cmd) => cmd.metadata as ApplicationCommandData),
         );
