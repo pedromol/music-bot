@@ -8,13 +8,14 @@ import { Play } from './play';
 import { Resume } from './resume';
 import { Skip } from './skip';
 import { Queue } from './queue';
+import { Kill } from './kill';
 
 export class Commands extends Command {
   commands: Command[];
 
   constructor(client: Client, subscriptions: Map<Snowflake, MusicSubscription>) {
     super(client, subscriptions);
-    this.commands = [Leave, Pause, Play, Queue, Resume, Skip].map((clazz) => new clazz(client, subscriptions));
+    this.commands = [Leave, Pause, Play, Queue, Resume, Skip, Kill].map((clazz) => new clazz(client, subscriptions));
     this.commands.push(new Deploy(client, subscriptions, this.commands));
   }
 
