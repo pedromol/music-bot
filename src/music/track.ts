@@ -64,7 +64,7 @@ export class Track implements TrackAction {
    */
   public createAudioResource(): Promise<AudioResource<Track>> {
     return new Promise((resolve, reject) => {
-      console.log(this.url);
+      console.log(`Playing ${this.url}`);
       const process = ytdl(
         this.url,
         {
