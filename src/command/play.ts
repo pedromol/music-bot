@@ -1,9 +1,10 @@
 import { entersState, joinVoiceChannel, VoiceConnectionStatus } from '@discordjs/voice';
 import { Track } from '../music/track';
-import Discord, { Snowflake, User } from 'discord.js';
+import Discord, { MessageEmbed, Snowflake, User } from 'discord.js';
 import { Search } from '../music/search';
 import { MusicSubscription } from '../music/subscription';
 import { Command, Route } from './command';
+import { Duration } from '../music/duration';
 
 export class Play extends Command {
   private musicSearch: Search;
@@ -49,7 +50,7 @@ export class Play extends Command {
 
     // If there is no subscription, tell the user they need to join a channel.
     if (!subscription) {
-      return this.reply({ content: 'Join a voice channel and then try that again!', followUp: true }, route);
+      return this.reply({ content: ':x: Join a voice channel and then try that again.', followUp: true }, route);
     }
 
     // Make sure the connection is ready before processing the user's request
@@ -58,7 +59,7 @@ export class Play extends Command {
     } catch (error) {
       console.warn(error);
       return this.reply(
-        { content: 'Failed to join voice channel within 20 seconds, please try again later!', followUp: true },
+        { content: ':sos: Failed to join voice channel within 20 seconds, please try again later.', followUp: true },
         route,
       );
     }
@@ -71,8 +72,10 @@ export class Play extends Command {
     const trackData = await this.musicSearch.getTrackData(argument, user);
 
     if (!trackData || !trackData.tracks.length) {
-      return this.reply({ content: 'Failed to find the track!', followUp: true }, route);
+      return this.reply({ content: ':mag_right: Failed to find the track.', followUp: true }, route);
     }
+
+    const duration = new Duration();
 
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const self = this;
@@ -83,34 +86,48 @@ export class Play extends Command {
           trackData,
           {
             onStart() {
-              self.reply({ content: 'Now playing!', ephemeral: true, followUp: true }, route).catch(console.warn);
+              // self.reply({ content: 'Now playing!', ephemeral: true, followUp: true }, route).catch(console.warn);
             },
             onFinish() {
-              self.reply({ content: 'Now finished!', ephemeral: true, followUp: true }, route).catch(console.warn);
+              // self.reply({ content: 'Now finished!', ephemeral: true, followUp: true }, route).catch(console.warn);
             },
             onError(error: Error) {
               console.warn(error);
               self
-                .reply({ content: `Error: ${error.message}`, ephemeral: true, followUp: true }, route)
+                .reply({ content: `:sos: Error: ${error.message}`, ephemeral: true, followUp: true }, route)
                 .catch(console.warn);
             },
           },
           self.musicSearch,
         );
-        // Enqueue the track and reply a success message to the user
+        // Enqueue the track
         if (subscription) subscription.enqueue(track);
+        duration.addTime(track.duration);
       });
+
+      const enqueued = trackData.playlist ?? trackData.tracks[0];
+      const author = trackData.playlist?.author?.name ?? trackData.tracks[0].author;
+      const response = new MessageEmbed()
+        .setColor('#7289da')
+        .setTitle(enqueued.title.includes(author) ? enqueued.title : `${author} - ${enqueued.title}`)
+        .setURL(enqueued.url)
+        .setAuthor(`${user.username} added to queue`, user.displayAvatarURL())
+        .setThumbnail(enqueued.thumbnail)
+        .addField('Channel', this.getChannel(route)?.name ?? 'Unknown', true)
+        .addField('Song duration', duration.getTime(), true)
+        .setTimestamp()
+        .setFooter(`Queue size: ${subscription.queue.length}`);
 
       await this.reply(
         {
-          content: `Enqueued **${trackData.playlist ? trackData.playlist.title : trackData.tracks[0].title}**`,
+          embeds: [response],
           followUp: true,
         },
         route,
       );
     } catch (error) {
       console.warn(error);
-      await this.reply({ content: 'Failed to play track, please try again later!' }, route);
+      await this.reply({ content: ':sos: Failed to play track, please try again later.' }, route);
     }
   }
 }

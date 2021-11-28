@@ -12,7 +12,7 @@ export class Leave extends Command {
     if (subscription) {
       subscription.voiceConnection.destroy();
       this.removeSubscription(route);
-      return this.reply({ content: `Left channel!`, ephemeral: true }, route);
+      return this.reply({ content: `:rocket: Left channel.`, ephemeral: true }, route);
     }
   }
 }

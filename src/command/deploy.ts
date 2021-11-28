@@ -24,7 +24,7 @@ export class Deploy extends Command {
           this.commands.filter((cmd) => cmd.metadata).map((cmd) => cmd.metadata as ApplicationCommandData),
         );
 
-        return this.reply({ content: 'Deployed!' }, route);
+        return this.reply({ content: ':tada: Deployed!' }, route);
       }
     }
   }

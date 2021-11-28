@@ -33,6 +33,6 @@ export class Commands extends Command {
       return command.execute(route);
     }
 
-    return this.reply({ content: 'Unknown command' }, route);
+    return this.reply({ content: ':question: Unknown command' }, route);
   }
 }

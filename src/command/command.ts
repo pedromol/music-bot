@@ -2,6 +2,7 @@ import Discord, {
   BaseCommandInteraction,
   ContextMenuInteraction,
   GuildMember,
+  MessageEmbed,
   Snowflake,
   User,
   VoiceChannel,
@@ -14,7 +15,8 @@ export type Route = {
 };
 
 export type CommonMessage = {
-  content: string;
+  content?: string;
+  embeds?: MessageEmbed[];
   ephemeral?: boolean;
   followUp?: boolean;
 };
@@ -49,7 +51,7 @@ export abstract class Command {
     const subscription = this.subscriptions.get(route.interaction?.guildId ?? route.message?.guildId ?? '');
 
     if (!subscription && required) {
-      await this.reply({ content: 'Not playing in this server!' }, route);
+      await this.reply({ content: ':mute: Not playing in this server.' }, route);
     }
 
     return subscription;
@@ -94,7 +96,7 @@ export abstract class Command {
   }
 
   async reply(message: CommonMessage, route: Route): Promise<void> {
-    if (!message || !message.content) {
+    if (!message || (!message.content && !message.embeds)) {
       console.error(`Cannot reply without content`);
       return;
     }
@@ -105,9 +107,10 @@ export abstract class Command {
     }
 
     if (route.interaction) {
-      await (message.followUp ? route.interaction.followUp(message) : route.interaction.reply(message));
+      const messageContent = message.embeds ? { embeds: message.embeds } : message;
+      await (message.followUp ? route.interaction.followUp(messageContent) : route.interaction.reply(messageContent));
     } else if (route.message) {
-      route.message.reply(message.content);
+      route.message.reply(message.content ?? { embeds: message.embeds });
     }
   }
 }

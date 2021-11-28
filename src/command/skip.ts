@@ -13,7 +13,7 @@ export class Skip extends Command {
       // listener defined in music/subscription.ts, transitions into the Idle state mean the next track from the queue
       // will be loaded and played.
       subscription.audioPlayer.stop();
-      return this.reply({ content: 'Skipped song!' }, route);
+      return this.reply({ content: ':track_next: Skipped song.' }, route);
     }
   }
 }

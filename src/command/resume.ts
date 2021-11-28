@@ -10,7 +10,7 @@ export class Resume extends Command {
     const subscription = await this.getSubscription(route);
     if (subscription) {
       subscription.audioPlayer.unpause();
-      return this.reply({ content: `Unpaused!`, ephemeral: true }, route);
+      return this.reply({ content: `:play_pause: Unpaused.`, ephemeral: true }, route);
     }
   }
 }

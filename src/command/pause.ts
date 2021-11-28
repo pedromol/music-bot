@@ -11,7 +11,7 @@ export class Pause extends Command {
 
     if (subscription) {
       subscription.audioPlayer.pause();
-      return this.reply({ content: `Paused!`, ephemeral: true }, route);
+      return this.reply({ content: `:pause_button: Paused.`, ephemeral: true }, route);
     }
   }
 }
