@@ -61,7 +61,10 @@ export class Play extends Command {
       return this.reply(
         { content: ':sos: Failed to join voice channel within 20 seconds, please try again later.', followUp: true },
         route,
-      );
+      ).then(() => {
+        console.error('Killing');
+        process.exit(1);
+      });
     }
 
     // Extract the video URL from the command
