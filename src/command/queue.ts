@@ -14,7 +14,7 @@ export class Queue extends Command {
     const subscription = await this.getSubscription(route);
     // Print out the current queue, including up to the next 5 tracks to be played.
     if (subscription) {
-      if (subscription.audioPlayer.state.status === AudioPlayerStatus.Idle || !subscription.queue.length) {
+      if (subscription.audioPlayer.state.status === AudioPlayerStatus.Idle) {
         return this.reply({ content: `:mute: Nothing is currently playing.` }, route);
       }
 
