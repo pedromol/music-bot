@@ -1,0 +1,13 @@
+version: "3"
+
+services:
+  music-bot:
+    image: pedromol/music-bot
+    container_name: music-bot
+    environment:
+      - PUID=0
+      - PGID=0
+      - "TZ=America/Sao_Paulo"
+      - "ALLOW_ANYONE_TO_KILL=false"
+      # - "DISCORD_TOKEN=UNCOMMENT AND INSERT YOUR TOKEN HERE!
+    restart: unless-stopped
