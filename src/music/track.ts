@@ -37,7 +37,7 @@ const noop = (): void => {};
 export class Track implements TrackAction {
   public readonly title: string;
   public readonly author: string;
-  public readonly url: string;
+  public url: string;
   public readonly thumbnail: string;
   public readonly duration: string;
   public readonly requestedBy: User;
@@ -63,7 +63,8 @@ export class Track implements TrackAction {
    * Creates an AudioResource from this Track.
    */
   public createAudioResource(): Promise<AudioResource<Track>> {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
+      this.url = (await this.search.getYtUrl(this)) ?? this.url;
       console.log(`Playing ${this.url}`);
       const process = ytdl(
         this.url,
