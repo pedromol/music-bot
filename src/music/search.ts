@@ -13,7 +13,7 @@ export class Search {
     user: User,
   ): Promise<
     | {
-        playlist?: Playlist;
+        playlist?: Playlist | null;
         tracks: TrackData[];
       }
     | undefined
